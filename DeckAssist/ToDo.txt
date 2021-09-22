@@ -1,0 +1,11 @@
+﻿create repository, 1st working revision, Import card lists, view deck, flip cards and read only flipped attributes, working mana curve
+refactor data classes such as deck and card to remove dependencies and remove viewmodel functionality, transfer control of those actions to viewmodel if necessary
+check if card is legal deck member (e.g. not a token)
+meld section
+assign commander and assess deck legality
+further deck building functionalities
+ keyword search
+ text search
+ creature type search
+ deck price challenge
+ alternate printings

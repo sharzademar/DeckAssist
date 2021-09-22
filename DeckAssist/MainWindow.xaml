@@ -1,0 +1,63 @@
+﻿<Window x:Class="DeckAssist.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:DVC="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=DotNetProjects.DataVisualization.Toolkit"
+        xmlns:local="clr-namespace:DeckAssist"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="1080" Width="1900">
+    <Window.Resources>
+        <local:ManaCurveConverter x:Key="ManaCurveConverter"/>
+    </Window.Resources>
+    <Grid Margin="0,0,-0.4,-5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Button Content="New Deck" Command="{Binding ImportDeck}" HorizontalAlignment="Left" Margin="10,232,0,0" VerticalAlignment="Top" Width="75"/>
+        <TextBox HorizontalAlignment="Left" Text="{Binding DeckText}"   Height="217" Margin="10,10,0,0" VerticalAlignment="Top" Width="311" AcceptsReturn="True"/>
+        <Label Content="Status:" HorizontalAlignment="Left" Margin="10,632,0,0" VerticalAlignment="Top"/>
+        <Label Content="{Binding Status}" HorizontalAlignment="Left" Margin="46,632,0,0" VerticalAlignment="Top"/>
+        <DataGrid Name="CardDataTable" IsSynchronizedWithCurrentItem="True"  SelectedItem="{Binding Deck.SelectedCard, Mode=TwoWay}" IsReadOnly="True" AutoGenerateColumns="False" ItemsSource="{Binding Deck.Cards}" HorizontalAlignment="Left" Height="241" VerticalAlignment="Top" Width="323" Margin="326,10,0,0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Path=DisplayName}"/>
+                <DataGridTextColumn Header="Qty" Binding="{Binding Path=Qty}"/>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding Path=Flip}">Flip</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding Path=RemoveSelf}">Remove</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding Path=IncreaseQty}">+</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding Path=DecreaseQty}">-</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Image Source="{Binding Deck.SelectedCard.FrontFace.ImageURI}" HorizontalAlignment="Left" Height="340" Margin="654,10,0,0" VerticalAlignment="Top" Width="244"/>
+        <Image Source="{Binding Deck.SelectedCard.BackFace.ImageURI}" HorizontalAlignment="Left" Height="340" Margin="903,10,0,0" VerticalAlignment="Top" Width="244"/>
+
+        <TextBox Text="{Binding Deck.ManaCurve, Converter={StaticResource ManaCurveConverter}}" IsReadOnly="True" FontFamily="Consolas" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,256,0,0" Width="639" Height="371"/>
+        <Label Content="{Binding ErrorMessages}" HorizontalAlignment="Left" Margin="10,646,0,0" VerticalAlignment="Top"/>
+        <Button Content="Add Cards to Deck" Command="{Binding AddToDeck}" HorizontalAlignment="Left" Margin="105,232,0,0" VerticalAlignment="Top" Width="121"/>
+        <Border BorderBrush="BlueViolet" Visibility="{Binding FrontBorder}" BorderThickness="5" HorizontalAlignment="Left" Height="340" Margin="654,10,0,0" VerticalAlignment="Top" Width="244"/>
+        <Border BorderBrush="BlueViolet" Visibility="{Binding BackBorder}" BorderThickness="5" HorizontalAlignment="Left" Height="340" Margin="903,10,0,0" VerticalAlignment="Top" Width="244"/>
+
+    </Grid>
+
+</Window>
