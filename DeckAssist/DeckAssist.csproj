@@ -67,17 +67,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Card.cs" />
-    <Compile Include="CardFaceDetail.cs" />
-    <Compile Include="Deck.cs" />
-    <Compile Include="HttpClientManager.cs" />
-    <Compile Include="ManaCurveCollection.cs" />
-    <Compile Include="ManaCurveConverter.cs" />
-    <Compile Include="ManaCurveDataPoint.cs" />
-    <Compile Include="ObservableConcurrentDictionary.cs" />
-    <Compile Include="RelayCommand.cs" />
-    <Compile Include="ViewModel.cs" />
-    <Compile Include="ViewModelBase.cs" />
+    <Compile Include="Model\Card.cs" />
+    <Compile Include="Model\CardEnumTypes.cs" />
+    <Compile Include="Model\CardFaceDetail.cs" />
+    <Compile Include="View\CardNameConverter.cs" />
+    <Compile Include="Model\Deck.cs" />
+    <Compile Include="Extensions\Extensions.cs" />
+    <Compile Include="Http\HttpClientManager.cs" />
+    <Compile Include="Model\ManaCurveCollection.cs" />
+    <Compile Include="View\ManaCurveConverter.cs" />
+    <Compile Include="Model\ManaCurveDataPoint.cs" />
+    <Compile Include="System.Collections.Concurrent\ObservableConcurrentDictionary.cs" />
+    <Compile Include="ViewModel\RelayCommand.cs" />
+    <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="ViewModel\ViewModelComponent.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -117,6 +120,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="ToDo.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

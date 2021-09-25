@@ -1,11 +1,9 @@
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\DeckAssist.csprojAssemblyReference.cache
-C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\MainWindow.g.cs
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\App.g.cs
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\DeckAssist_MarkupCompile.cache
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\DeckAssist.exe.config
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\DeckAssist.exe
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\DeckAssist.pdb
-C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\MainWindow.baml
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\DeckAssist.g.resources
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\DeckAssist.Properties.Resources.resources
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\DeckAssist.csproj.GenerateResource.cache
@@ -24,3 +22,5 @@ C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\LiveCharts.Wpf
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\DotNetProjects.DataVisualization.Toolkit.dll
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\GeneratedInternalTypeHelper.g.cs
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\DeckAssist_MarkupCompile.lref
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\MainWindow.g.cs
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\MainWindow.baml
