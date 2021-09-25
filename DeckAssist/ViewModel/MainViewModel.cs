@@ -16,6 +16,8 @@ namespace DeckAssist.ViewModel
 {
     internal class MainViewModel : ViewModelComponent
     {
+        private readonly static string scryfallExactURI = "https://api.scryfall.com/cards/named?exact=";
+
         private readonly static string[] watchedCardProperties = new string[]
         {
             nameof(Card.Qty),
@@ -129,7 +131,7 @@ namespace DeckAssist.ViewModel
                     OnIncreaseQty(match, qty); //this probably doesnt work with double sided cards
                 else
                 {
-                    HttpResponseMessage response = await HttpClientManager.GetRequest("https://api.scryfall.com/cards/named?exact=" + name);
+                    HttpResponseMessage response = await HttpClientManager.GetRequest(scryfallExactURI + name);
                     string responseString = await HttpClientManager.GetResponseContent(response);
                     System.Threading.Thread.Sleep(100);
 

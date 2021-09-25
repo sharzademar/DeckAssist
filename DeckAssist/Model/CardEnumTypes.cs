@@ -51,11 +51,19 @@ namespace DeckAssist.Model
 
     public static class EnumHelper
     {
-        public static string[] CardTypeStrings = Enum.GetNames(typeof(CardType));
-
-        public static CardType GetCardTypeFromString(string strCardType)
+        public static string[] EnumStrings<T>() where T : Enum
         {
-            return (CardType)Enum.Parse(typeof(CardType), strCardType);
+            return Enum.GetNames(typeof(T));
+        }
+
+        public static T Parse<T>(string value)
+        {
+            return (T)Enum.Parse(typeof(T), value);
+        }
+
+        public static bool TryParse<T>(string value, out T e) where T : struct
+        {
+            return Enum.TryParse(value, out e);
         }
     }
 }

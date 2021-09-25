@@ -1,10 +1,14 @@
-﻿using DeckAssist.ViewModel;
+﻿using DeckAssist.Extensions;
+using DeckAssist.ViewModel;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 
 namespace DeckAssist.Model
 {
+    /// <summary>
+    /// Represents a card, its faces, and any other data associated with the card
+    /// </summary>
     public class Card : ViewModelComponent
     {
         private CardFaceDetail backFace;
@@ -15,6 +19,9 @@ namespace DeckAssist.Model
         private int qty;
         private CardFaceDetail selectedCardFaceDetail;
 
+        /// <summary>
+        /// Return a new <c>Card</c> with default values
+        /// </summary>
         public Card()
         {
             qty = 0;
@@ -26,6 +33,11 @@ namespace DeckAssist.Model
             selectedCardFaceDetail = frontFace;
         }
 
+        /// <summary>
+        /// Return a card populated by a scryfall response to <c>cards/named?exact=</c>
+        /// </summary>
+        /// <param name="response">A response from the scryfall api at cards/named?exact=</param>
+        /// <param name="qty">The number of cards this card entry object represents</param>
         public Card(string response, int qty) : this()
         {
             JObject card = JObject.Parse(response);
@@ -37,7 +49,7 @@ namespace DeckAssist.Model
 
             strLayout = strLayout.Equals("class") ? "_class" : strLayout;
 
-            if (!Enum.TryParse(strLayout, out Layout layout))
+            if (!EnumHelper.TryParse(strLayout, out Layout layout))
             {
                 throw new ArgumentException(String.Format("Scryfall returned an unimplemented card layout: {0}", strLayout));
             }

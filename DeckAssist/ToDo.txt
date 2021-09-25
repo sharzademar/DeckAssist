@@ -1,19 +1,20 @@
-﻿[TODO]reduce reused code in layout definitions
+﻿[TODO]  reduce reused code in layout definitions
+[TODO]  
 [TODO]	REDO card flip logic to be less messy
-[PART]	look up and apply general refactoring tips and naming conventions
+[TODO]  handle errors properly
 [TODO]	make deck input box instruction text hint text
 [TODO]	change orientation of card preview when viewing split cards
-[TODO]  make flip button for flip cards simply flip the card
 [TODO]  remove references to Card.Parent deck and find alternate solutions
-[TODO]check if card is legal deck member (e.g. not a token)
-[TODO]meld preview section
-[TODO]assign commander and assess deck legality for various formats
-[TODO]further deck building functionalities
-[TODO]	keyword search
-[TODO]	text search
-[TODO]	creature type search
-[TODO]	deck price challenge
-[TODO]	alternate printings
+[TODO]  check if card is legal deck member (e.g. not a token)
+[TODO]  meld preview section
+[TODO]  assign commander and assess deck legality for various formats
+[TODO]  further deck building functionalities
+[TODO]	  keyword search
+[TODO]	  text search
+[TODO]	  creature type search
+[TODO]    alternate printings
+[TODO]	  deck price challenge
+[TODO]	  
 
 [DONE]create repository, 1st working revision, Import card lists, view deck, flip cards and read only flipped attributes, working mana curve
 [DONE]refactor data classes such as deck and card to remove dependencies and remove viewmodel functionality, transfer control of those actions to viewmodel if necessary

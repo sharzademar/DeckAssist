@@ -1,4 +1,5 @@
 ﻿using DeckAssist.ViewModel;
+using System;
 using System.Collections.ObjectModel;
 
 namespace DeckAssist.Model
@@ -61,10 +62,16 @@ namespace DeckAssist.Model
         {
             var x = new ObservableCollection<CardType>();
 
-            foreach (string name in EnumHelper.CardTypeStrings)
+            foreach (string name in EnumHelper.EnumStrings<CardType>())
             {
                 if (typeLine.Contains(name))
-                    x.Add(EnumHelper.GetCardTypeFromString(name));
+                {
+                    if (!EnumHelper.TryParse(name, out CardType ct))
+                    {
+                        throw new ArgumentException(String.Format("Scryfall returned an unimplemented card type: {0}", typeLine));
+                    }
+                    x.Add(ct);
+                }
             }
 
             return x;
