@@ -24,3 +24,12 @@ C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\GeneratedInter
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\DeckAssist_MarkupCompile.lref
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\MainWindow.g.cs
 C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\obj\Debug\MainWindow.baml
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\Serilog.dll
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\Serilog.Sinks.Console.dll
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\Serilog.Sinks.File.dll
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\Serilog.xml
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\Serilog.Sinks.Console.xml
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\Serilog.Sinks.File.pdb
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\Serilog.Sinks.File.xml
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\System.ValueTuple.dll
+C:\Users\Sharzademar\source\repos\DeckAssist\DeckAssist\bin\Debug\System.ValueTuple.xml

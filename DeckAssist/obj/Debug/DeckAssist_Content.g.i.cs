@@ -8,6 +8,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("todo.txt")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("jsonexamples/normal.txt")]
 
 

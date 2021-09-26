@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using DeckAssist.Http;
 using DeckAssist.ViewModel;
-using DeckAssist.Http;
+using Serilog;
+using System;
+using System.Windows;
 
 namespace DeckAssist
 {
@@ -11,10 +13,20 @@ namespace DeckAssist
     {
         public MainWindow()
         {
-            var viewModel = new MainViewModel();
-            
-            DataContext = viewModel;
+            //initialize logger
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File("logfile.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            //use proper security protocol
             HttpClientManager.UseProperTLS();
+
+            //data context
+            var viewModel = new MainViewModel();
+            DataContext = viewModel;
+
             InitializeComponent();
         }
     }
