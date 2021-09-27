@@ -49,63 +49,84 @@ namespace DeckAssist.Model
         /// </summary>
         /// <param name="response">A response from the scryfall api at cards/named?exact=</param>
         /// <param name="qty">The number of cards this card entry object represents</param>
+        /// <exception cref="JsonReaderException"></exception>
+        /// <exception cref="KeyNotFoundException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public Card(string response, int qty) : this()
         {
+            bool isCMCSingle;
+            string strLayout;
+            int frontCMC;
+
+            //read response json
             cardJson = JObject.Parse(response);
-            Qty = qty;
 
-            string strLayout = (string)cardJson.SelectToken("layout");
+            //read the layout, replace json token class with enum property _class
+            strLayout = (string)cardJson.SelectToken("layout");
             strLayout = strLayout.Equals("class") ? "_class" : strLayout;
-            DisplayName = ((string)cardJson.SelectToken("name"));
-
+            //if scryfall returns an unknown layout type, throw
             if (!EnumHelper.TryParse(strLayout, out Layout layout))
             {
                 throw new ArgumentException(String.Format("Scryfall returned an unimplemented card layout: {0}", strLayout), "response");
             }
 
+            //set high level properties
+            DisplayName = ((string)cardJson.SelectToken("name"));
+            Qty = qty;
             CardLayout = layout;
 
+            //get properties of layout
             LayoutProperties properties = EnumHelper.GetLayoutProperties(CardLayout);
+            isCMCSingle = properties.ConvertedManaCost.PropertyMode == PropertyMode.Single;
 
-            SetTarget(properties.Naming, JSONTokens.name, (x, y) =>
+            SetTarget(properties.Name, (x, y) =>
             {
                 FrontFace.Name = (string)x[0];
                 if (y == PropertyMode.Double)
                     BackFace.Name = (string)x[1];
             });
-            SetTarget(properties.Type, JSONTokens.type_line, (x, y) =>
+            SetTarget(properties.Type, (x, y) =>
             {
                 FrontFace.TypeLine = (string)x[0];
                 if (y == PropertyMode.Double)
                     BackFace.TypeLine = (string)x[1];
             });
-            SetTarget(properties.ArtFaces, JSONTokens.image_uris_normal, (x, y) =>
+            SetTarget(properties.ArtFaces, (x, y) =>
             {
                 FrontFace.ImageURI = (string)x[0];
                 if (y == PropertyMode.Double)
                     BackFace.ImageURI = (string)x[1];
             });
-            SetTarget(properties.ColorIdentities, JSONTokens.colors, (x, y) =>
+            SetTarget(properties.ColorIdentities, (x, y) =>
             {
                 AddIdentityToFace(FrontFace, x[0]);
                 if (y == PropertyMode.Double)
                     AddIdentityToFace(BackFace, x[1]);
             });
-            SetTarget(properties.ConvertedManaCost, JSONTokens.cmc,
-                (x, y) =>
+            SetTarget(properties.ConvertedManaCost, (x, y) =>
                 {
-                    int front = y == PropertyMode.Single ? (int)x[0] : ConvertManaCostToCMC((string)x[0]);
-                    FrontFace.ConvertedManaCost = front;
+                    //assign front cmc to upper cmc token if single, or convert from child mana_cost tokens if double
+                    frontCMC = isCMCSingle ? (int)x[0] : ConvertManaCostToCMC((string)x[0]);
+                    FrontFace.ConvertedManaCost = frontCMC;
                     ConvertedManaCost = FrontFace.ConvertedManaCost;
                     if (y == PropertyMode.Double)
                         BackFace.ConvertedManaCost = ConvertManaCostToCMC((string)x[1]);
                 });
         }
 
+        /// <summary>
+        /// Reference to the back face of the card
+        /// </summary>
         public CardFaceDetail BackFace { get => backFace; set => SetProperty(ref backFace, value); }
 
+        /// <summary>
+        /// The layout type of the card
+        /// </summary>
         public Layout CardLayout { get => cardLayout; set => SetProperty(ref cardLayout, value); }
 
+        /// <summary>
+        /// The card's converted mana cost
+        /// </summary>
         public int ConvertedManaCost { get => cmc; set => SetProperty(ref cmc, value); }
 
         public string DisplayName { get => displayName; set => SetProperty(ref displayName, value); }
@@ -148,9 +169,6 @@ namespace DeckAssist.Model
                     face.ColorIdentities |= ConvertColorIdentity((string)identity);
                 }
             }
-
-            /*if (face.ColorIdentities.Count > 1)
-                face.ColorIdentities.Add(ColorIdentity.Multicolored);*/
         }
 
         private ColorIdentity ConvertColorIdentity(string color)
@@ -216,32 +234,28 @@ namespace DeckAssist.Model
             return cmc;
         }
 
-        //SetTarget(properties.naming, JSONTokens.name, x => { FrontFace.Name = x[0]; BackFace.Name = x[1]; }
-        private void SetTarget(PropertyMode mode, JSONTokens token, Action<JToken[], PropertyMode> action)
+        private void SetTarget(LayoutProperty property, Action<JToken[], PropertyMode> action)
         {
             JToken[] tokens = new JToken[2];
 
-            string safeToken = token.ToString();
-            if (safeToken == JSONTokens.image_uris_normal.ToString())
+            //compensate for tokens named with any '.'
+            string safeToken = property.JSONToken.ToString();
+            if (safeToken == JSONToken.image_uris_normal.ToString())
                 safeToken = "image_uris.normal";
 
-            string subToken = safeToken;
-            if (subToken == JSONTokens.cmc.ToString() && mode == PropertyMode.Double)
-                subToken = "mana_cost";
-
-            if (mode == PropertyMode.Single)
+            if (property.PropertyMode == PropertyMode.Single)
             {
                 tokens[0] = cardJson.SelectToken(safeToken);
             }
-            else if (mode == PropertyMode.Double)
+            else if (property.PropertyMode == PropertyMode.Double)
             {
                 JToken jFaces = cardJson.SelectToken("card_faces");
 
-                tokens[0] = jFaces[0].SelectToken(subToken);
-                tokens[1] = jFaces[1].SelectToken(subToken);
+                tokens[0] = jFaces[0].SelectToken(safeToken);
+                tokens[1] = jFaces[1].SelectToken(safeToken);
             }
 
-            action(tokens, mode);
+            action(tokens, property.PropertyMode);
         }
     }
 }

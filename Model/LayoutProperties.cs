@@ -15,65 +15,18 @@ namespace DeckAssist.Model
 
     public class LayoutProperties
     {
-        private PropertyMode naming;
-        private PropertyMode type;
-        private PropertyMode artFaces;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">The names of a card can't be combined</exception>
-        public PropertyMode Naming { get => naming;
-            set
-            {
-                if (value == PropertyMode.Combined)
-                    throw new ArgumentOutOfRangeException("value", PropertyMode.Combined,
-                        "The names of a card can't be combined");
-                naming = value;
-            }
-        }
+        public LayoutProperty Name { get; set; }
         /// <summary>
         /// 
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">The types of a card can't be Combined</exception>
-        public PropertyMode Type
-        {
-            get => type;
-            set
-            {
-                if (value == PropertyMode.Combined)
-                    throw new ArgumentOutOfRangeException("value", PropertyMode.Combined,
-                        "The types of a card can't be combined");
-                type = value;
-            }
-        }
+        public LayoutProperty Type { get; set; }
         /// <summary>
         /// 
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">The art faces of a card can't be Combined</exception>
-        public PropertyMode ArtFaces
-        {
-            get => artFaces;
-            set
-            {
-                if (value == PropertyMode.Combined)
-                    throw new ArgumentOutOfRangeException("value", PropertyMode.Combined, "The art faces of a card can't be combined");
-                artFaces = value;
-            }
-        }
-        public PropertyMode ColorIdentities { get; set; }
-        public PropertyMode ConvertedManaCost { get; set; }
-        public Dictionary<string, PropertyMode> PropertiesFromTokenName { get; private set; }
-
-        public LayoutProperties()
-        {
-            PropertiesFromTokenName = new Dictionary<string, PropertyMode>
-            {
-                { "name", Naming },
-                { "image_uris.normal", ArtFaces },
-                { "colors", ColorIdentities},
-                { "cmc", ConvertedManaCost }
-            };
-        }
+        public LayoutProperty ArtFaces { get; set; }
+        public LayoutProperty ColorIdentities { get; set; }
+        public LayoutProperty ConvertedManaCost { get; set; }
     }
 }

@@ -7,13 +7,14 @@ namespace DeckAssist.Model
     /// <summary>
     /// Represents the name of a particular JSON token
     /// </summary>
-    public enum JSONTokens
+    public enum JSONToken
     {
         name,
         image_uris_normal,
         colors,
         type_line,
-        cmc
+        cmc,
+        mana_cost
     }
 
     /// <summary>
@@ -75,61 +76,75 @@ namespace DeckAssist.Model
         {
             try
             {
+                //define the layout properties
+                LayoutProperty singleName = new LayoutProperty { JSONToken = JSONToken.name, PropertyMode = PropertyMode.Single },
+                               doubleName = new LayoutProperty { JSONToken = JSONToken.name, PropertyMode = PropertyMode.Double },
+                               singleType = new LayoutProperty { JSONToken = JSONToken.type_line, PropertyMode = PropertyMode.Single },
+                               doubleType = new LayoutProperty { JSONToken = JSONToken.type_line, PropertyMode = PropertyMode.Double },
+                               singleArt = new LayoutProperty
+                                   { JSONToken = JSONToken.image_uris_normal, PropertyMode = PropertyMode.Single },
+                               doubleArt = new LayoutProperty
+                                   { JSONToken = JSONToken.image_uris_normal, PropertyMode = PropertyMode.Double },
+                               singleColor = new LayoutProperty { JSONToken = JSONToken.colors, PropertyMode = PropertyMode.Single },
+                               doubleColor = new LayoutProperty { JSONToken = JSONToken.colors, PropertyMode = PropertyMode.Double },
+                               singleCMC = new LayoutProperty { JSONToken = JSONToken.cmc, PropertyMode = PropertyMode.Single },
+                               doubleCMC = new LayoutProperty { JSONToken = JSONToken.mana_cost, PropertyMode = PropertyMode.Double };
+
                 return new Dictionary<Layout, LayoutProperties>
                 {
                     {
                         Layout.normal,
                         new LayoutProperties
                         {
-                            Naming = PropertyMode.Single,
-                            Type = PropertyMode.Single,
-                            ArtFaces = PropertyMode.Single,
-                            ColorIdentities = PropertyMode.Single,
-                            ConvertedManaCost = PropertyMode.Single
+                            Name = singleName,
+                            Type = singleType,
+                            ArtFaces = singleArt,
+                            ColorIdentities = singleColor,
+                            ConvertedManaCost = singleCMC
                         }
                     },
                     {
                         Layout.split,
                         new LayoutProperties
                         {
-                            Naming = PropertyMode.Double,
-                            Type = PropertyMode.Double,
-                            ArtFaces = PropertyMode.Single,
-                            ColorIdentities = PropertyMode.Single,
-                            ConvertedManaCost = PropertyMode.Single
+                            Name = singleName,
+                            Type = singleType,
+                            ArtFaces = singleArt,
+                            ColorIdentities = singleColor,
+                            ConvertedManaCost = singleCMC
                         }
                     },
                     {
                         Layout.flip,
                         new LayoutProperties
                         {
-                            Naming = PropertyMode.Double,
-                            Type = PropertyMode.Double,
-                            ArtFaces = PropertyMode.Single,
-                            ColorIdentities = PropertyMode.Single,
-                            ConvertedManaCost = PropertyMode.Single
+                            Name = doubleName,
+                            Type = doubleType,
+                            ArtFaces = singleArt,
+                            ColorIdentities = singleColor,
+                            ConvertedManaCost = singleCMC
                         }
                     },
                     {
                         Layout.transform,
                         new LayoutProperties
                         {
-                            Naming = PropertyMode.Double,
-                            Type = PropertyMode.Double,
-                            ArtFaces = PropertyMode.Double,
-                            ColorIdentities = PropertyMode.Double,
-                            ConvertedManaCost = PropertyMode.Single
+                            Name = doubleName,
+                            Type = doubleType,
+                            ArtFaces = doubleArt,
+                            ColorIdentities = doubleColor,
+                            ConvertedManaCost = singleCMC
                         }
                     },
                     {
                         Layout.modal_dfc,
                         new LayoutProperties
                         {
-                            Naming = PropertyMode.Double,
-                            Type = PropertyMode.Double,
-                            ArtFaces = PropertyMode.Double,
-                            ColorIdentities = PropertyMode.Double,
-                            ConvertedManaCost = PropertyMode.Double
+                            Name = doubleName,
+                            Type = doubleType,
+                            ArtFaces = doubleArt,
+                            ColorIdentities = doubleColor,
+                            ConvertedManaCost = doubleCMC
                         }
                     }
                 };

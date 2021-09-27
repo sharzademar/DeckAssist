@@ -83,6 +83,7 @@
     <Compile Include="Model\CardEnumTypes.cs" />
     <Compile Include="Model\CardFaceDetail.cs" />
     <Compile Include="Model\LayoutProperties.cs" />
+    <Compile Include="Model\LayoutProperty.cs" />
     <Compile Include="View\CardNameConverter.cs" />
     <Compile Include="Model\Deck.cs" />
     <Compile Include="Extensions\Extensions.cs" />
