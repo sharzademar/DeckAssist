@@ -1,5 +1,5 @@
 ﻿[TODO]  reduce reused code in layout definitions
-
+[TODO]  initialize local variables of functions correctly (Gnereal refactoring)
 
 [TODO]  handle errors properly
 

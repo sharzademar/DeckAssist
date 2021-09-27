@@ -57,6 +57,11 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
+
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
+            </DataGrid.Resources>
         </DataGrid>
         <Image Source="{Binding SelectedCard.FrontFace.ImageURI}" HorizontalAlignment="Left" Height="340" Margin="654,10,0,0" VerticalAlignment="Top" Width="244"/>
         <Image Source="{Binding SelectedCard.BackFace.ImageURI}" HorizontalAlignment="Left" Height="340" Margin="903,10,0,0" VerticalAlignment="Top" Width="244"/>

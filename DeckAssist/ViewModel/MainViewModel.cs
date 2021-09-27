@@ -199,81 +199,79 @@ namespace DeckAssist.ViewModel
             card.Qty -= amount;
         }
 
+        private void AddNewFlippedCard(Card card, Card nextCard, int index)
+        {
+            nextCard.SelectedCardFaceDetail =
+                    nextCard.SelectedCardFaceDetail == nextCard.FrontFace ? nextCard.BackFace : nextCard.FrontFace;
+            nextCard.Qty = 1;
+            Deck.AddCard(nextCard, index);
+        }
+
+        private void FlipCard(Card card)
+        {
+            bool isFrontFace,
+                 isMoreThanLastPosition,
+                 isLessThanZero,
+                 isAdjacentCardOtherSide;
+
+            int adjacentIndex,
+                cardIndex,
+                insertIndex;
+
+            Card nextCard;
+
+            cardIndex = Deck.GetIndexOf(card);
+            isFrontFace = card.SelectedCardFaceDetail == card.FrontFace;
+            adjacentIndex = isFrontFace ? cardIndex + 1 : cardIndex - 1;
+            insertIndex = isFrontFace ? adjacentIndex : cardIndex;
+            isMoreThanLastPosition = adjacentIndex > Deck.Cards.Count - 1;
+            isLessThanZero = adjacentIndex < 0;
+
+            // if index of next card is in bounds
+            if (!isMoreThanLastPosition && !isLessThanZero)
+            {
+                //get adjacent card
+                nextCard = Deck.Cards[adjacentIndex];
+                //is adjacent card the corresponding face
+                isAdjacentCardOtherSide = nextCard.DisplayName.Equals(card.DisplayName);
+                //if so, increase Qty
+                if (isAdjacentCardOtherSide) 
+                {
+                    nextCard.Qty++;
+                }
+                //otherwise, add new card to adjecent position
+                else
+                {
+                    nextCard = card.Copy();
+                    AddNewFlippedCard(card, nextCard, insertIndex);
+                }
+            }
+            //if out of bounds, add new card to start or end of list
+            else
+            {
+                //if index is more than count, -1 to default to append, else start of list
+                insertIndex = isMoreThanLastPosition ? -1 : 0;
+
+                nextCard = card.Copy();
+                AddNewFlippedCard(card, nextCard, insertIndex);
+            }
+
+            card.Qty--;
+
+            //if no more cards of this entry remain, remove the card entry from the deck and select the new card
+            if (card.Qty == 0)
+            {
+                SelectedCard = nextCard;
+                Deck.RemoveCard(card);
+            }
+        }
+
         private void OnFlip(Card card)
         {
             if (!(card.CardLayout == Layout.modal_dfc))
                 return;
 
-            int index = Deck.GetIndexOf(card);
-
-            if (card.SelectedCardFaceDetail == card.FrontFace)
-            {
-                Card nextCard;
-                if (index + 1 < Deck.Cards.Count)
-                {
-                    nextCard = Deck.Cards[index + 1];
-                    bool isBackofCard = nextCard.DisplayName.Equals(card.DisplayName);
-                    if (isBackofCard)
-                    {
-                        nextCard.Qty++;
-                    }
-                    else
-                    {
-                        nextCard = card.Copy();
-                        nextCard.SelectedCardFaceDetail = nextCard.BackFace;
-                        nextCard.Qty = 1;
-                        Deck.AddCard(nextCard, index + 1);
-                    }
-                }
-                else
-                {
-                    nextCard = card.Copy();
-                    nextCard.SelectedCardFaceDetail = nextCard.BackFace;
-                    nextCard.Qty = 1;
-                    Deck.AddCard(nextCard, index + 1);
-                }
-
-                card.Qty--;
-
-                if (card.Qty == 0)
-                {
-                    Deck.RemoveCard(card);
-                }
-            }
-            else
-            {
-                Card prevCard;
-                if (index - 1 >= 0)
-                {
-                    prevCard = Deck.Cards[index - 1];
-                    bool isFrontofCard = prevCard.DisplayName.Equals(card.DisplayName);
-                    if (isFrontofCard)
-                    {
-                        prevCard.Qty++;
-                    }
-                    else
-                    {
-                        prevCard = card.Copy();
-                        prevCard.SelectedCardFaceDetail = prevCard.FrontFace;
-                        prevCard.Qty = 1;
-                        Deck.AddCard(prevCard, Deck.GetIndexOf(card));
-                    }
-                }
-                else
-                {
-                    prevCard = card.Copy();
-                    prevCard.SelectedCardFaceDetail = prevCard.FrontFace;
-                    prevCard.Qty = 1;
-                    Deck.AddCard(prevCard, 0);
-                }
-
-                card.Qty--;
-
-                if (card.Qty == 0)
-                {
-                    Deck.RemoveCard(card);
-                }
-            }
+            FlipCard(card);
 
             Console.WriteLine("congratu-flippin-lations!!!");
         }
