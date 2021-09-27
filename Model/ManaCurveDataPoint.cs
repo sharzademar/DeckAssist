@@ -1,5 +1,6 @@
 ﻿using DeckAssist.ViewModel;
 using System;
+using System.Linq;
 using System.Collections.Concurrent;
 
 namespace DeckAssist.Model
@@ -10,15 +11,14 @@ namespace DeckAssist.Model
         {
             ConvertedManaCost = 0;
             Qty = 0;
-            ColorDistribution = new ObservableConcurrentDictionary<ColorIdentity, int>
+            ColorDistribution = new ObservableConcurrentDictionary<ColorIdentity, int>()
             {
                 { ColorIdentity.Colorless, 0 },
                 { ColorIdentity.Green, 0 },
                 { ColorIdentity.Red, 0 },
                 { ColorIdentity.Black, 0 },
                 { ColorIdentity.Blue, 0 },
-                { ColorIdentity.White, 0 },
-                { ColorIdentity.Multicolored, 0 }
+                { ColorIdentity.White, 0 }
             };
         }
 
@@ -40,7 +40,9 @@ namespace DeckAssist.Model
                     ColorDistribution[ColorIdentity.Black],
                     ColorDistribution[ColorIdentity.Blue],
                     ColorDistribution[ColorIdentity.White],
-                    ColorDistribution[ColorIdentity.Multicolored]
+                    ColorDistribution
+                        .Where(x => EnumHelper.Flag.Count((long)x.Key) > 1)
+                        .Sum(x => x.Value) 
                 );
         }
     }

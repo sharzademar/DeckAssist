@@ -22,29 +22,27 @@ namespace DeckAssist.Model
         {
             Console.WriteLine("AnalyzeCurve()");
             Clear();
-            NumLands = cards.Where(x => x.SelectedCardFaceDetail.CardTypes.Contains(CardType.Land)).Sum(x => x.Qty);
+            NumLands = cards.Where(x => x.SelectedCardFaceDetail.CardTypes.HasFlag(CardType.Land)).Sum(x => x.Qty);
             Sum = cards.Sum(x => x.Qty);
 
             var cardGrouping = cards
-                .Where(x => !x.SelectedCardFaceDetail.CardTypes.Contains(CardType.Land))
+                .Where(x => !x.SelectedCardFaceDetail.CardTypes.HasFlag(CardType.Land))
                 .GroupBy(x => x.CardLayout == Layout.modal_dfc ?
                                 x.SelectedCardFaceDetail.ConvertedManaCost : x.ConvertedManaCost);
 
             foreach (var group in cardGrouping)
             {
                 ManaCurveDataPoint mcdp = new ManaCurveDataPoint { ConvertedManaCost = group.Key };
+                
                 Add(group.Key, mcdp);
 
                 foreach (var card in group)
                 {
+                    ColorIdentity ci = card.SelectedCardFaceDetail.ColorIdentities;
                     mcdp.Qty += card.Qty;
-
-                    if (card.SelectedCardFaceDetail.ColorIdentities.Count == 1)
-                        mcdp.ColorDistribution[card.SelectedCardFaceDetail.ColorIdentities.First()] += card.Qty;
-                    else if (card.SelectedCardFaceDetail.ColorIdentities.Count > 1)
-                        mcdp.ColorDistribution[ColorIdentity.Multicolored] += card.Qty;
-                    else
-                        throw new ArgumentException(String.Format("Card contains no color identity: {0}", card));
+                    if (!mcdp.ColorDistribution.ContainsKey(ci))
+                        mcdp.ColorDistribution.Add(ci, 0);
+                    mcdp.ColorDistribution[ci] += card.Qty;
                 }
             }
         }

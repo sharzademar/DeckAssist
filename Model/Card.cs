@@ -1,8 +1,6 @@
-﻿using DeckAssist.Extensions;
-using DeckAssist.ViewModel;
+﻿using DeckAssist.ViewModel;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace DeckAssist.Model
@@ -32,7 +30,6 @@ namespace DeckAssist.Model
         private int qty;
         private CardFaceDetail selectedCardFaceDetail;
 
-
         /// <summary>
         /// Return a new <c>Card</c> with default values
         /// </summary>
@@ -45,40 +42,6 @@ namespace DeckAssist.Model
             frontFace = new CardFaceDetail();
             backFace = new CardFaceDetail();
             selectedCardFaceDetail = frontFace;
-        }
-
-        private T ConvertObject<T>(object input)
-        {
-            return (T)Convert.ChangeType(input, typeof(T));
-        }
-
-        //SetTarget(properties.naming, JSONTokens.name, x => { FrontFace.Name = x[0]; BackFace.Name = x[1]; }
-        private void SetTarget(PropertyMode mode, JSONTokens token, Action<JToken[], PropertyMode> action)
-        {
-            JToken[] tokens = new JToken[2];
-
-            string safeToken = token.ToString();
-            if (safeToken == JSONTokens.image_uris_normal.ToString())
-                safeToken = "image_uris.normal";
-
-            string subToken = safeToken;
-            if (subToken == JSONTokens.cmc.ToString() && mode == PropertyMode.Double)
-                subToken = "mana_cost";
-
-            
-            if (mode == PropertyMode.Single)
-            {
-                tokens[0] = cardJson.SelectToken(safeToken);
-            }
-            else if (mode == PropertyMode.Double)
-            {
-                JToken jFaces = cardJson.SelectToken("card_faces");
-
-                tokens[0] = jFaces[0].SelectToken(subToken);
-                tokens[1] = jFaces[1].SelectToken(subToken);
-            }
-
-            action(tokens, mode);
         }
 
         /// <summary>
@@ -116,7 +79,7 @@ namespace DeckAssist.Model
                 if (y == PropertyMode.Double)
                     BackFace.TypeLine = (string)x[1];
             });
-            SetTarget(properties.ArtFaces, JSONTokens.image_uris_normal, (x, y) => 
+            SetTarget(properties.ArtFaces, JSONTokens.image_uris_normal, (x, y) =>
             {
                 FrontFace.ImageURI = (string)x[0];
                 if (y == PropertyMode.Double)
@@ -140,11 +103,17 @@ namespace DeckAssist.Model
         }
 
         public CardFaceDetail BackFace { get => backFace; set => SetProperty(ref backFace, value); }
+
         public Layout CardLayout { get => cardLayout; set => SetProperty(ref cardLayout, value); }
+
         public int ConvertedManaCost { get => cmc; set => SetProperty(ref cmc, value); }
+
         public string DisplayName { get => displayName; set => SetProperty(ref displayName, value); }
+
         public CardFaceDetail FrontFace { get => frontFace; set => SetProperty(ref frontFace, value); }
+
         public int Qty { get => qty; set => SetProperty(ref qty, value); }
+
         public CardFaceDetail SelectedCardFaceDetail { get => selectedCardFaceDetail; set => SetProperty(ref selectedCardFaceDetail, value); }
 
         public Card Copy()
@@ -171,17 +140,17 @@ namespace DeckAssist.Model
         private void AddIdentityToFace(CardFaceDetail face, JToken identities)
         {
             if (identities.Count() == 0)
-                face.ColorIdentities.Add(ColorIdentity.Colorless);
+                face.ColorIdentities |= ColorIdentity.Colorless;
             else
             {
                 foreach (var identity in identities)
                 {
-                    face.ColorIdentities.Add(ConvertColorIdentity((string)identity));
+                    face.ColorIdentities |= ConvertColorIdentity((string)identity);
                 }
             }
 
-            if (face.ColorIdentities.Count > 1)
-                face.ColorIdentities.Add(ColorIdentity.Multicolored);
+            /*if (face.ColorIdentities.Count > 1)
+                face.ColorIdentities.Add(ColorIdentity.Multicolored);*/
         }
 
         private ColorIdentity ConvertColorIdentity(string color)
@@ -245,6 +214,34 @@ namespace DeckAssist.Model
             }
 
             return cmc;
+        }
+
+        //SetTarget(properties.naming, JSONTokens.name, x => { FrontFace.Name = x[0]; BackFace.Name = x[1]; }
+        private void SetTarget(PropertyMode mode, JSONTokens token, Action<JToken[], PropertyMode> action)
+        {
+            JToken[] tokens = new JToken[2];
+
+            string safeToken = token.ToString();
+            if (safeToken == JSONTokens.image_uris_normal.ToString())
+                safeToken = "image_uris.normal";
+
+            string subToken = safeToken;
+            if (subToken == JSONTokens.cmc.ToString() && mode == PropertyMode.Double)
+                subToken = "mana_cost";
+
+            if (mode == PropertyMode.Single)
+            {
+                tokens[0] = cardJson.SelectToken(safeToken);
+            }
+            else if (mode == PropertyMode.Double)
+            {
+                JToken jFaces = cardJson.SelectToken("card_faces");
+
+                tokens[0] = jFaces[0].SelectToken(subToken);
+                tokens[1] = jFaces[1].SelectToken(subToken);
+            }
+
+            action(tokens, mode);
         }
     }
 }

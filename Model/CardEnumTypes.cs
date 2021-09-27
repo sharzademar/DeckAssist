@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 namespace DeckAssist.Model
 {
-
+    /// <summary>
+    /// Represents the name of a particular JSON token
+    /// </summary>
     public enum JSONTokens
     {
         name,
@@ -13,26 +15,31 @@ namespace DeckAssist.Model
         type_line,
         cmc
     }
-    public enum CardType
+
+    /// <summary>
+    /// Represents the various card types a card can contain. Can contain multiple.
+    /// </summary>
+    [Flags] public enum CardType
     {
-        Land,
-        Creature,
-        Artifact,
-        Enchantment,
-        Planeswalker,
-        Instant,
-        Sorcery
+        None = 0,
+        Land = 1 << 0,
+        Creature = 1 << 1,
+        Artifact = 1 << 2,
+        Enchantment = 1 << 3,
+        Planeswalker = 1 << 4,
+        Instant = 1 << 5,
+        Sorcery = 1 << 6
     }
 
-    public enum ColorIdentity
+    [Flags] public enum ColorIdentity
     {
-        White,
-        Blue,
-        Black,
-        Red,
-        Green,
-        Colorless,
-        Multicolored
+        None = 0,
+        White = 1 << 0,
+        Blue = 1 << 1,
+        Black = 1 << 2,
+        Red = 1 << 3,
+        Green = 1 << 4,
+        Colorless = 1 << 5
     }
 
     public enum Layout
@@ -158,6 +165,34 @@ namespace DeckAssist.Model
         public static bool TryParse<T>(string value, out T e) where T : struct
         {
             return Enum.TryParse(value, out e);
+        }
+
+        public static class Flag
+        {
+            public static void ToggleFlags<T>(ref T flag1, T flag2) where T : Enum
+            {
+                int flag1Int = (int)(object)flag1,
+                    flag2Int = (int)(object)flag2;
+
+                flag1 = (T)(object)(flag1Int ^= flag2Int);
+            }
+
+            public static int Count(long lValue)
+            {
+                int setCount = 0;
+
+                // while there are still set bits
+                while(lValue != 0)
+                {
+                    //unsets the largest bit (e.g 0101 & 0100 = 0100, 0100 & 0000 = 0000)
+                    lValue &= (lValue - 1);
+
+                    //increase count of bits found
+                    setCount++;
+                }
+
+                return setCount;
+            }
         }
     }
 }

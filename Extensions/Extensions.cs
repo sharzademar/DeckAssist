@@ -1,4 +1,5 @@
 ﻿using System;
+using DeckAssist.Model;
 
 namespace DeckAssist.Extensions
 {

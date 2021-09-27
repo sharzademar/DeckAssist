@@ -1,7 +1,9 @@
 ﻿using DeckAssist.Extensions;
 using DeckAssist.Http;
 using DeckAssist.Model;
+using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
@@ -199,7 +201,7 @@ namespace DeckAssist.ViewModel
             card.Qty -= amount;
         }
 
-        private void AddNewFlippedCard(Card card, Card nextCard, int index)
+        private void AddNewFlippedCard(Card nextCard, int index)
         {
             nextCard.SelectedCardFaceDetail =
                     nextCard.SelectedCardFaceDetail == nextCard.FrontFace ? nextCard.BackFace : nextCard.FrontFace;
@@ -243,7 +245,7 @@ namespace DeckAssist.ViewModel
                 else
                 {
                     nextCard = card.Copy();
-                    AddNewFlippedCard(card, nextCard, insertIndex);
+                    AddNewFlippedCard(nextCard, insertIndex);
                 }
             }
             //if out of bounds, add new card to start or end of list
@@ -253,7 +255,7 @@ namespace DeckAssist.ViewModel
                 insertIndex = isMoreThanLastPosition ? -1 : 0;
 
                 nextCard = card.Copy();
-                AddNewFlippedCard(card, nextCard, insertIndex);
+                AddNewFlippedCard(nextCard, insertIndex);
             }
 
             card.Qty--;
@@ -277,9 +279,17 @@ namespace DeckAssist.ViewModel
         }
         private async Task OnImportDeck()
         {
-            SelectedCard = new Card();
-            Deck.ClearDeck();
-            await OnAddToDeck();
+            try
+            {
+                SelectedCard = new Card();
+                Deck.ClearDeck();
+                await OnAddToDeck();
+            }
+            catch (KeyNotFoundException e)
+            {
+                Log.Fatal(e.StackTrace);
+                throw;
+            }
         }
 
         private void OnIncreaseQty(Card card, int amount = 1)

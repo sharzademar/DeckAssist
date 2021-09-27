@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -16,6 +17,8 @@ namespace DeckAssist.Http
         /// </summary>
         /// <param name="request">The URI of the request</param>
         /// <returns>The response message returned by the server</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="HttpRequestException"></exception>
         public static async Task<HttpResponseMessage> GetRequest(string request)
         {
             return await client.GetAsync(request);
