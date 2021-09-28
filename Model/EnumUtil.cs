@@ -5,89 +5,9 @@ using System.Collections.Generic;
 namespace DeckAssist.Model
 {
     /// <summary>
-    /// Represents the name of a particular JSON token
-    /// </summary>
-    public enum JSONToken
-    {
-        name,
-        image_uris_normal,
-        colors,
-        type_line,
-        cmc,
-        mana_cost
-    }
-
-    /// <summary>
-    /// Represents the ways a LayoutProperty can behave
-    /// </summary>
-    public enum PropertyMode
-    {
-        Single,
-        Double
-    }
-
-    /// <summary>
-    /// Represents the various card types a card can contain. Can contain multiple.
-    /// </summary>
-    [Flags] public enum CardType
-    {
-        None = 0,
-        Land = 1 << 0,
-        Creature = 1 << 1,
-        Artifact = 1 << 2,
-        Enchantment = 1 << 3,
-        Planeswalker = 1 << 4,
-        Instant = 1 << 5,
-        Sorcery = 1 << 6,
-        Legendary = 1 << 7
-    }
-
-    /// <summary>
-    /// Represents the collection of color identities a card can have.
-    /// </summary>
-    [Flags] public enum ColorIdentity
-    {
-        None = 0,
-        White = 1 << 0,
-        Blue = 1 << 1,
-        Black = 1 << 2,
-        Red = 1 << 3,
-        Green = 1 << 4,
-        Colorless = 1 << 5
-    }
-
-    /// <summary>
-    /// Represents the specific layout of the card
-    /// </summary>
-    public enum Layout
-    {
-        normal, //implemented
-        split, //implemented
-        flip, //implemented
-        transform, //implemented
-        modal_dfc, //implemented
-        meld,
-        leveler,
-        _class,
-        saga,
-        adventure,
-        planar,
-        scheme,
-        vanguard,
-        token,
-        double_faced_token,
-        emblem,
-        augment,
-        host,
-        art_series,
-        double_sided,
-        unassigned
-    }
-
-    /// <summary>
     /// Utility class to assist in Enum operations
     /// </summary>
-    public static class EnumHelper
+    public static class EnumUtil
     {
         private static readonly Dictionary<Layout, PropertySettings> layoutProperties = InitLayoutProperties();
 

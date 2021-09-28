@@ -3,6 +3,41 @@ using System;
 
 namespace DeckAssist.Model
 {
+    /// <summary>
+    /// Represents the various card types a card can contain. Can contain multiple.
+    /// </summary>
+    [Flags]
+    public enum CardType
+    {
+        None = 0,
+        Land = 1 << 0,
+        Creature = 1 << 1,
+        Artifact = 1 << 2,
+        Enchantment = 1 << 3,
+        Planeswalker = 1 << 4,
+        Instant = 1 << 5,
+        Sorcery = 1 << 6,
+        Legendary = 1 << 7
+    }
+
+    /// <summary>
+    /// Represents the collection of color identities a card can have.
+    /// </summary>
+    [Flags]
+    public enum ColorIdentity
+    {
+        None = 0,
+        White = 1 << 0,
+        Blue = 1 << 1,
+        Black = 1 << 2,
+        Red = 1 << 3,
+        Green = 1 << 4,
+        Colorless = 1 << 5
+    }
+
+    /// <summary>
+    /// Represent the face of a card along with its relevant data
+    /// </summary>
     public class CardFaceDetail : ViewModelComponent
     {
         private const string cardBack = "https://c1.scryfall.com/file/scryfall-card-backs/normal/59/597b79b3-7d77-4261-871a-60dd17403388.jpg";
@@ -94,11 +129,11 @@ namespace DeckAssist.Model
         {
             CardType x = CardType.None;
 
-            foreach (string name in EnumHelper.EnumStrings<CardType>())
+            foreach (string name in EnumUtil.EnumStrings<CardType>())
             {
                 if (typeLine.Contains(name))
                 {
-                    if (!EnumHelper.TryParse(name, out CardType ct))
+                    if (!EnumUtil.TryParse(name, out CardType ct))
                     {
                         throw new ArgumentException(String.Format("Scryfall returned an unimplemented card type: {0}", typeLine));
                     }

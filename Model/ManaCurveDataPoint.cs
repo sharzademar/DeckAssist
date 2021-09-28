@@ -63,7 +63,7 @@ namespace DeckAssist.Model
                     ColorDistribution[ColorIdentity.Blue],
                     ColorDistribution[ColorIdentity.White],
                     ColorDistribution
-                        .Where(x => EnumHelper.Flag.Count((long)x.Key) > 1)
+                        .Where(x => EnumUtil.Flag.Count((long)x.Key) > 1)
                         .Sum(x => x.Value)
                 );
         }

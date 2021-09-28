@@ -6,6 +6,34 @@ using System.Linq;
 namespace DeckAssist.Model
 {
     /// <summary>
+    /// Represents the specific layout of the card
+    /// </summary>
+    public enum Layout
+    {
+        normal, //implemented
+        split, //implemented
+        flip, //implemented
+        transform, //implemented
+        modal_dfc, //implemented
+        meld,
+        leveler,
+        _class,
+        saga,
+        adventure,
+        planar,
+        scheme,
+        vanguard,
+        token,
+        double_faced_token,
+        emblem,
+        augment,
+        host,
+        art_series,
+        double_sided,
+        unassigned
+    }
+
+    /// <summary>
     /// Represents a card, its faces, and any other data associated with the card
     /// </summary>
     public class Card : ViewModelComponent
@@ -66,7 +94,7 @@ namespace DeckAssist.Model
             strLayout = (string)cardJson.SelectToken("layout");
             strLayout = strLayout.Equals("class") ? "_class" : strLayout;
             //if scryfall returns an unknown layout type, throw
-            if (!EnumHelper.TryParse(strLayout, out Layout layout))
+            if (!EnumUtil.TryParse(strLayout, out Layout layout))
             {
                 throw new ArgumentException(String.Format("Scryfall returned an unimplemented card layout: {0}", strLayout), "response");
             }
@@ -77,7 +105,7 @@ namespace DeckAssist.Model
             CardLayout = layout;
 
             //get properties of layout
-            PropertySettings properties = EnumHelper.GetPropertySettings(CardLayout);
+            PropertySettings properties = EnumUtil.GetPropertySettings(CardLayout);
             isCMCSingle = properties.ConvertedManaCost.PropertyMode == PropertyMode.Single;
 
             SetTarget(properties.Name, (x, y) =>
