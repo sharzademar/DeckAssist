@@ -1,6 +1,5 @@
 ﻿using DeckAssist.ViewModel;
 using System;
-using System.Collections.ObjectModel;
 
 namespace DeckAssist.Model
 {
@@ -14,6 +13,10 @@ namespace DeckAssist.Model
         private string imageURI;
         private string name;
         private string typeLine;
+
+        /// <summary>
+        /// Initialize a CardFaceDetail object with default values and a name of "Unassigned"
+        /// </summary>
         public CardFaceDetail()
         {
             //initialize with unusable values to indicate value not relevant unless manually assigned
@@ -25,11 +28,37 @@ namespace DeckAssist.Model
             cardTypes = CardType.None;
         }
 
-        public CardType CardTypes { get => cardTypes; set => SetProperty(ref cardTypes, value); }
+        /// <summary>
+        /// The set of flags that represent the various card types of the card face. Can only be read;
+        /// </summary>
+        public CardType CardTypes { get => cardTypes; private set => SetProperty(ref cardTypes, value); }
+
+        /// <summary>
+        /// The set of flags that represent the various color identities of the card face
+        /// </summary>
+
         public ColorIdentity ColorIdentities { get => colorIdentities; set => SetProperty(ref colorIdentities, value); }
+
+        /// <summary>
+        /// The set of flags that represent the various color identities of the card face
+        /// </summary>
         public int ConvertedManaCost { get => cmc; set => SetProperty(ref cmc, value); }
+
+        /// <summary>
+        /// The artwork for the card face
+        /// </summary>
         public string ImageURI { get => imageURI; set => SetProperty(ref imageURI, value); }
+
+        /// <summary>
+        /// The name of the card face
+        /// </summary>
         public string Name { get => name; set => SetProperty(ref name, value); }
+
+        /// <summary>
+        /// The Type line text of the card. This also sets CardFaceDetail.CardTypes.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public string TypeLine
         {
             get => typeLine;
@@ -39,6 +68,13 @@ namespace DeckAssist.Model
                 SetProperty(ref typeLine, value);
             }
         }
+
+        /// <summary>
+        /// Create a memberwise copy of a CardFaceDetail.
+        /// </summary>
+        /// <returns>A new CardFaceDetail with the same member values as this object</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public CardFaceDetail Copy()
         {
             return new CardFaceDetail
@@ -52,6 +88,8 @@ namespace DeckAssist.Model
             };
         }
 
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         private CardType ExtractTypes(string typeLine)
         {
             CardType x = CardType.None;

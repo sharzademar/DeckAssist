@@ -20,6 +20,9 @@ namespace DeckAssist.ViewModel
     {
         private readonly static string scryfallExactURI = "https://api.scryfall.com/cards/named?exact=";
 
+        /// <summary>
+        /// the mana curve is updated when these properties are changed
+        /// </summary>
         private readonly static string[] watchedCardProperties = new string[]
         {
             nameof(Card.Qty),
@@ -35,6 +38,9 @@ namespace DeckAssist.ViewModel
         private ManaCurveCollection manaCurve;
         private Card selectedCard;
         private string status;
+        /// <summary>
+        /// Initialize the view model
+        /// </summary>
         public MainViewModel()
         {
             errorMessages = String.Empty;
@@ -57,20 +63,61 @@ namespace DeckAssist.ViewModel
             deck.Cards.CollectionChanged += OnCardsChanged;
             PropertyChanged += OnSelectedCardChanged;
         }
-
+        /// <summary>
+        /// The Command for adding a set of cards to an existing deck
+        /// </summary>
         public ICommand AddToDeck { get; private set; }
+        /// <summary>
+        /// The visibility status of the back face modal border
+        /// </summary>
         public Visibility BackBorder { get => backBorder; set => SetProperty(ref backBorder, value); }
+        /// <summary>
+        /// A reference to the active deck.
+        /// </summary>
         public Deck Deck { get => deck; set => SetProperty(ref deck, value); }
+        /// <summary>
+        /// The deck text to attempt to import into the deck
+        /// </summary>
         public string DeckText { get => deckText; set => SetProperty(ref deckText, value); }
+        /// <summary>
+        /// The Command for decreasing the Qty of a card
+        /// </summary>
         public ICommand DecreaseQty { get; private set; }
+        /// <summary>
+        /// A collection of the error messages raised by the view model
+        /// </summary>
         public string ErrorMessages { get => errorMessages; set => SetProperty(ref errorMessages, value); }
+        /// <summary>
+        /// The command to flip a modal card
+        /// </summary>
         public ICommand Flip { get; private set; }
+        /// <summary>
+        /// The visibility status of the front face modal border
+        /// </summary>
         public Visibility FrontBorder { get => frontBorder; set => SetProperty(ref frontBorder, value); }
+        /// <summary>
+        /// The Command to import a new deck
+        /// </summary>
         public ICommand ImportDeck { get; private set; }
+        /// <summary>
+        /// The Command to increase the Qty of a card
+        /// </summary>
         public ICommand IncreaseQty { get; private set; }
+        /// <summary>
+        /// A reference to the Deck's ManaCurveCollection
+        /// </summary>
         public ManaCurveCollection ManaCurve { get => manaCurve; set => SetProperty(ref manaCurve, value); }
+        /// <summary>
+        /// The Command for a card to delete itself
+        /// </summary>
         public ICommand RemoveSelf { get; private set; }
+        /// <summary>
+        /// A reference to the currently selected card
+        /// </summary>
         public Card SelectedCard { get => selectedCard; set => SetProperty(ref selectedCard, value); }
+        /// <summary>
+        /// A reference to the Status text
+        /// </summary>
         public string Status { get => status; set => SetProperty(ref status, value); }
         private void AddError(string s)
         {
@@ -98,9 +145,22 @@ namespace DeckAssist.ViewModel
 
         private async Task OnAddToDeck()
         {
-            isImporting = true;
+            string[] listings;
+
+            string qtyStr,
+                   name,
+                   listing;
+
+            int index;
+
+            Card match,
+                 newCard,
+                 existingBackCard;
+
+            //clear error messages
             ErrorMessages = String.Empty;
 
+            //return if nothing to import
             if (DeckText.Equals(String.Empty))
             {
                 Status = "ERROR - Nothing to import";
@@ -109,51 +169,90 @@ namespace DeckAssist.ViewModel
                 return;
             }
 
-            DeckText = DeckText.Replace(Environment.NewLine, "\n").Trim();
+            //standardize newline
+            DeckText = DeckText.Replace(Environment.NewLine, "\n").Trim(); //exceptions never throw :)
 
-            var x = DeckText.Split('\n');
-            foreach (string listing in x)
+            //get listings
+            listings = DeckText.Split('\n');
+
+            //flag start importing
+            isImporting = true;
+
+            foreach (string listingUntrimmed in listings)
             {
-                Status = "Retrieving...";
-                string qtyStr = listing.Split(' ')[0];
+                //trim the listing
+                listing = listingUntrimmed.Trim();
+
+                //if the string is empty, add no error, but move to next iteration
+                if (listing.Equals(String.Empty))
+                    continue;
+
+                //get the first part of a listing
+                qtyStr = listing.Split(' ')[0];
+
+                // if the first part isnt an int, write to errors and move to next iteration
                 if (!Int32.TryParse(qtyStr, out int qty) || qty < 1)
                 {
                     Status = String.Format("ERROR - A listing did not begin with an appropriate integer \"{0}\"", listing);
                     AddError(Status);
                     continue;
                 }
+                //do the same if there isnt anything following the integer
+                if (qtyStr.Length == listing.Length)
+                {
+                    Status = String.Format("ERROR - No name is following the quantity of this listing: {0}", listing);
+                    AddError(Status);
+                    continue;
+                }
 
-                string name = listing.Substring(qtyStr.Length + 1);
+                //retrieves as name the substring after the space that follows the quantity of a listing
+                name = listing.Substring(qtyStr.Length + 1);
+                //encode string to UTF8
                 name = Encoding.UTF8.GetString(Encoding.Default.GetBytes(name));
+                //update status
                 Status = String.Format("Retrieving {0}...", name);
 
-                Card match = Deck.FindCardByUserString(name);
 
+                //if card of same name already exists, update quantity of existing entry
+                match = Deck.FindCardByName(name);
                 if (match != null)
-                    OnIncreaseQty(match, qty); //this probably doesnt work with double sided cards
+                    OnIncreaseQty(match, qty);
                 else
                 {
+                    //query the server for cards matching the name
                     HttpResponseMessage response = await HttpClientManager.GetRequest(scryfallExactURI + name);
                     string responseString = await HttpClientManager.GetResponseContent(response);
+                    //rate limit requests per the request of scryfall
                     System.Threading.Thread.Sleep(100);
 
-                    if (response.StatusCode.Equals(HttpStatusCode.NotFound))
+                    //if the response failed
+                    if (!response.IsSuccessStatusCode)
                     {
-                        Status = String.Format("ERROR - {0} was not found.", name);
+                        //display the response code and offending argument
+                        Status = String.Format("ERROR - {0} {1} Card name passed: \"{2}\"",
+                            (int)response.StatusCode, response.ReasonPhrase, listing);
                         AddError(Status);
                         continue;
                     }
-                    Card newCard = new Card(responseString, qty);
 
-                    if (newCard.BackFace.Name.EqualsIgnoreCase(name))
+                    //initialize new card with scryfall response
+                    newCard = new Card(responseString, qty);
+
+                    //if the user passed the back name of the card, and it's modal, select the back face of this card
+                    if (newCard.BackFace.Name.EqualsIgnoreCase(name) && newCard.CardLayout == Layout.modal_dfc)
                         newCard.SelectedCardFaceDetail = newCard.BackFace;
 
+                    //if new card is modal and new card is the front side
                     if (newCard.CardLayout == Layout.modal_dfc && newCard.SelectedCardFaceDetail == newCard.FrontFace)
                     {
-                        Card existingBackCard = Deck.FindCardByUserString(newCard.BackFace.Name);
-                        int index = Deck.GetIndexOf(existingBackCard);
+                        //if back card isnt found, null
+                        existingBackCard = Deck.FindCardByName(newCard.BackFace.Name);
+                        //get index of card if not null, otherwise -1
+                        index = Deck.GetIndexOf(existingBackCard);
+                        //append if index -1, otherwise insert at index
                         Deck.AddCard(newCard, index);
                     }
+                    //otherwise, add as normal
                     else
                     {
                         Deck.AddCard(newCard);
@@ -161,11 +260,15 @@ namespace DeckAssist.ViewModel
                 }
             }
 
+            // if cards were added, select the first card
             if (Deck.Cards.Count >= 1)
                 SelectedCard = deck.Cards.First();
 
+            //clear the user inout field
             DeckText = String.Empty;
+            //update user
             Status = String.Format("Cards added {0}", ErrorMessages.Equals(String.Empty) ? "successfully" : "with errors");
+            //unset importing flag
             isImporting = false;
         }
 
@@ -201,6 +304,8 @@ namespace DeckAssist.ViewModel
             card.Qty -= amount;
         }
 
+        
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         private void AddNewFlippedCard(Card nextCard, int index)
         {
             nextCard.SelectedCardFaceDetail =
@@ -209,6 +314,7 @@ namespace DeckAssist.ViewModel
             Deck.AddCard(nextCard, index);
         }
 
+        /// <exception cref="ArgumentOutOfRangeException">This shouldn't throw as the index is checked for</exception>
         private void FlipCard(Card card)
         {
             bool isFrontFace,
@@ -279,17 +385,9 @@ namespace DeckAssist.ViewModel
         }
         private async Task OnImportDeck()
         {
-            try
-            {
-                SelectedCard = new Card();
-                Deck.ClearDeck();
-                await OnAddToDeck();
-            }
-            catch (KeyNotFoundException e)
-            {
-                Log.Fatal(e.StackTrace);
-                throw;
-            }
+            SelectedCard = new Card();
+            Deck.ClearDeck();
+            await OnAddToDeck();
         }
 
         private void OnIncreaseQty(Card card, int amount = 1)

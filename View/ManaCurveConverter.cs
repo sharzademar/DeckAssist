@@ -6,6 +6,9 @@ using System.Windows.Data;
 
 namespace DeckAssist.View
 {
+    /// <summary>
+    /// Converter class for XAML data binding. Converts a ManaCurveColllection to a basic string representation.
+    /// </summary>
     [ValueConversion(typeof(ManaCurveCollection), typeof(String))]
     public class ManaCurveConverter : IValueConverter
     {

@@ -1,12 +1,18 @@
 ﻿using DeckAssist.ViewModel;
 using System;
-using System.Linq;
 using System.Collections.Concurrent;
+using System.Linq;
 
 namespace DeckAssist.Model
 {
+    /// <summary>
+    /// Represents a data point for a particular converted mana cost value, including the quantities of the colors of each card with the converted mana cost.
+    /// </summary>
     public class ManaCurveDataPoint : ViewModelComponent
     {
+        /// <summary>
+        /// Initialize the data point, including initializing the color distribution with the mono colors
+        /// </summary>
         public ManaCurveDataPoint()
         {
             ConvertedManaCost = 0;
@@ -22,9 +28,25 @@ namespace DeckAssist.Model
             };
         }
 
+        /// <summary>
+        /// The quantities of the cards in this data point grouped by color
+        /// </summary>
         public ObservableConcurrentDictionary<ColorIdentity, int> ColorDistribution { get; set; }
+
+        /// <summary>
+        /// The converted mana cost of this data point
+        /// </summary>
         public int ConvertedManaCost { get; set; }
+
+        /// <summary>
+        /// The total Qty of cards in this data point
+        /// </summary>
         public int Qty { get; set; }
+
+        /// <summary>
+        /// Return a basic string representation of the data point
+        /// </summary>
+        /// <returns>a basic string representation of the data point</returns>
         public override string ToString()
         {
             return Qty == 0 ?
@@ -42,7 +64,7 @@ namespace DeckAssist.Model
                     ColorDistribution[ColorIdentity.White],
                     ColorDistribution
                         .Where(x => EnumHelper.Flag.Count((long)x.Key) > 1)
-                        .Sum(x => x.Value) 
+                        .Sum(x => x.Value)
                 );
         }
     }

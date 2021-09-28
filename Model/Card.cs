@@ -52,6 +52,7 @@ namespace DeckAssist.Model
         /// <exception cref="JsonReaderException"></exception>
         /// <exception cref="KeyNotFoundException"></exception>
         /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public Card(string response, int qty) : this()
         {
             bool isCMCSingle;
@@ -76,7 +77,7 @@ namespace DeckAssist.Model
             CardLayout = layout;
 
             //get properties of layout
-            LayoutProperties properties = EnumHelper.GetLayoutProperties(CardLayout);
+            PropertySettings properties = EnumHelper.GetPropertySettings(CardLayout);
             isCMCSingle = properties.ConvertedManaCost.PropertyMode == PropertyMode.Single;
 
             SetTarget(properties.Name, (x, y) =>
@@ -129,14 +130,32 @@ namespace DeckAssist.Model
         /// </summary>
         public int ConvertedManaCost { get => cmc; set => SetProperty(ref cmc, value); }
 
+        /// <summary>
+        /// The display name of the entire card
+        /// </summary>
         public string DisplayName { get => displayName; set => SetProperty(ref displayName, value); }
 
+        /// <summary>
+        /// Reference to the front face of a card
+        /// </summary>
         public CardFaceDetail FrontFace { get => frontFace; set => SetProperty(ref frontFace, value); }
 
+        /// <summary>
+        /// The number of cards associated with this card entry
+        /// </summary>
         public int Qty { get => qty; set => SetProperty(ref qty, value); }
 
+        /// <summary>
+        /// A reference to the currently selected face
+        /// </summary>
         public CardFaceDetail SelectedCardFaceDetail { get => selectedCardFaceDetail; set => SetProperty(ref selectedCardFaceDetail, value); }
 
+        /// <summary>
+        /// Memberwise clone a Card object
+        /// </summary>
+        /// <returns>A new Card object with the same values as this Card object</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public Card Copy()
         {
             CardFaceDetail copiedFront = frontFace.Copy();
@@ -158,6 +177,7 @@ namespace DeckAssist.Model
             return String.Format("[Name: {0}]", DisplayName);
         }
 
+        /// <exception cref="ArgumentException"></exception>
         private void AddIdentityToFace(CardFaceDetail face, JToken identities)
         {
             if (identities.Count() == 0)
@@ -171,6 +191,7 @@ namespace DeckAssist.Model
             }
         }
 
+        /// <exception cref="ArgumentException"></exception>
         private ColorIdentity ConvertColorIdentity(string color)
         {
             ColorIdentity c;
@@ -198,7 +219,7 @@ namespace DeckAssist.Model
                     break;
 
                 default:
-                    throw new ArgumentException("Unexpected color identifier from Scryfall");
+                    throw new ArgumentException("Unexpected color identifier from Scryfall", "color");
             }
 
             return c;
@@ -206,13 +227,16 @@ namespace DeckAssist.Model
 
         private int ConvertManaCostToCMC(string mana_cost)
         {
+            //stop execution if no mana cost string
             if (mana_cost.Equals(String.Empty))
                 return 0;
 
             int cmc = 0;
 
+            //change {x}{y} format to x,y,
             mana_cost = mana_cost.Replace("{", "").Replace("}", ",");
-            mana_cost = mana_cost.Remove(mana_cost.Length - 1); //remove trailing comma
+            //remove trailing comma
+            mana_cost = mana_cost.Remove(mana_cost.Length - 1);
 
             foreach (var costBlock in mana_cost.Split(','))
             {
@@ -236,10 +260,11 @@ namespace DeckAssist.Model
 
         private void SetTarget(LayoutProperty property, Action<JToken[], PropertyMode> action)
         {
+            JToken jFaces;
             JToken[] tokens = new JToken[2];
+            string safeToken = property.JSONToken.ToString();
 
             //compensate for tokens named with any '.'
-            string safeToken = property.JSONToken.ToString();
             if (safeToken == JSONToken.image_uris_normal.ToString())
                 safeToken = "image_uris.normal";
 
@@ -249,7 +274,7 @@ namespace DeckAssist.Model
             }
             else if (property.PropertyMode == PropertyMode.Double)
             {
-                JToken jFaces = cardJson.SelectToken("card_faces");
+                jFaces = cardJson.SelectToken("card_faces");
 
                 tokens[0] = jFaces[0].SelectToken(safeToken);
                 tokens[1] = jFaces[1].SelectToken(safeToken);

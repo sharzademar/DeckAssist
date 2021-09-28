@@ -18,6 +18,15 @@ namespace DeckAssist.Model
     }
 
     /// <summary>
+    /// Represents the ways a LayoutProperty can behave
+    /// </summary>
+    public enum PropertyMode
+    {
+        Single,
+        Double
+    }
+
+    /// <summary>
     /// Represents the various card types a card can contain. Can contain multiple.
     /// </summary>
     [Flags] public enum CardType
@@ -29,9 +38,13 @@ namespace DeckAssist.Model
         Enchantment = 1 << 3,
         Planeswalker = 1 << 4,
         Instant = 1 << 5,
-        Sorcery = 1 << 6
+        Sorcery = 1 << 6,
+        Legendary = 1 << 7
     }
 
+    /// <summary>
+    /// Represents the collection of color identities a card can have.
+    /// </summary>
     [Flags] public enum ColorIdentity
     {
         None = 0,
@@ -43,6 +56,9 @@ namespace DeckAssist.Model
         Colorless = 1 << 5
     }
 
+    /// <summary>
+    /// Represents the specific layout of the card
+    /// </summary>
     public enum Layout
     {
         normal, //implemented
@@ -68,11 +84,14 @@ namespace DeckAssist.Model
         unassigned
     }
 
+    /// <summary>
+    /// Utility class to assist in Enum operations
+    /// </summary>
     public static class EnumHelper
     {
-        private static readonly Dictionary<Layout, LayoutProperties> layoutProperties = InitLayoutProperties();
+        private static readonly Dictionary<Layout, PropertySettings> layoutProperties = InitLayoutProperties();
 
-        private static Dictionary<Layout, LayoutProperties> InitLayoutProperties()
+        private static Dictionary<Layout, PropertySettings> InitLayoutProperties()
         {
             try
             {
@@ -90,11 +109,11 @@ namespace DeckAssist.Model
                                singleCMC = new LayoutProperty { JSONToken = JSONToken.cmc, PropertyMode = PropertyMode.Single },
                                doubleCMC = new LayoutProperty { JSONToken = JSONToken.mana_cost, PropertyMode = PropertyMode.Double };
 
-                return new Dictionary<Layout, LayoutProperties>
+                return new Dictionary<Layout, PropertySettings>
                 {
                     {
                         Layout.normal,
-                        new LayoutProperties
+                        new PropertySettings
                         {
                             Name = singleName,
                             Type = singleType,
@@ -105,7 +124,7 @@ namespace DeckAssist.Model
                     },
                     {
                         Layout.split,
-                        new LayoutProperties
+                        new PropertySettings
                         {
                             Name = singleName,
                             Type = singleType,
@@ -116,7 +135,7 @@ namespace DeckAssist.Model
                     },
                     {
                         Layout.flip,
-                        new LayoutProperties
+                        new PropertySettings
                         {
                             Name = doubleName,
                             Type = doubleType,
@@ -127,7 +146,7 @@ namespace DeckAssist.Model
                     },
                     {
                         Layout.transform,
-                        new LayoutProperties
+                        new PropertySettings
                         {
                             Name = doubleName,
                             Type = doubleType,
@@ -138,7 +157,7 @@ namespace DeckAssist.Model
                     },
                     {
                         Layout.modal_dfc,
-                        new LayoutProperties
+                        new PropertySettings
                         {
                             Name = doubleName,
                             Type = doubleType,
@@ -157,33 +176,50 @@ namespace DeckAssist.Model
         }
 
         /// <summary>
-        /// 
+        /// Returns the property settings for the provided layout
         /// </summary>
-        /// <param name="layout"></param>
-        /// <returns></returns>
+        /// <param name="layout">The layout for w hich to retrieve the settings</param>
+        /// <returns>The property settings for the layout</returns>
         /// <exception cref="KeyNotFoundException">A layout value was added to <c>Layout</c> that is not yet implemented</exception>
-        public static LayoutProperties GetLayoutProperties(Layout layout)
+        public static PropertySettings GetPropertySettings(Layout layout)
         {
             return layoutProperties[layout];
         }
 
+        /// <summary>
+        /// Returns an array of strings that is the names of the provided enumerated type
+        /// </summary>
+        /// <typeparam name="T">The provided enumerated type</typeparam>
+        /// <returns>The names of the enum as an array of strings</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public static string[] EnumStrings<T>() where T : Enum
         {
             return Enum.GetNames(typeof(T));
         }
 
-        public static T Parse<T>(string value)
-        {
-            return (T)Enum.Parse(typeof(T), value);
-        }
-
+        /// <summary>
+        /// Generic wrapper for Enum.TryParse
+        /// </summary>
+        /// <typeparam name="T">The type of the enum parameter</typeparam>
+        /// <param name="value">The string representation of the name of an enum constant</param>
+        /// <param name="e">The enum to store the conversion in</param>
+        /// <returns>Whether or not the conversion succeeded</returns>
         public static bool TryParse<T>(string value, out T e) where T : struct
         {
             return Enum.TryParse(value, out e);
         }
-
+        /// <summary>
+        /// Collection of utility functions related to flags
+        /// </summary>
         public static class Flag
         {
+            /// <summary>
+            /// Toggle the flag bit of a flag
+            /// </summary>
+            /// <typeparam name="T">The type of the flag</typeparam>
+            /// <param name="flag1">The flag to modify</param>
+            /// <param name="flag2">The flag bit(s) to toggle</param>
             public static void ToggleFlags<T>(ref T flag1, T flag2) where T : Enum
             {
                 int flag1Int = (int)(object)flag1,
@@ -191,7 +227,11 @@ namespace DeckAssist.Model
 
                 flag1 = (T)(object)(flag1Int ^= flag2Int);
             }
-
+            /// <summary>
+            /// Counts the set bits of a flag
+            /// </summary>
+            /// <param name="lValue">The flag represented as a long</param>
+            /// <returns>The number of set bits in lValue</returns>
             public static int Count(long lValue)
             {
                 int setCount = 0;

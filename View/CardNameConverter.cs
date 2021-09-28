@@ -5,6 +5,9 @@ using System.Windows.Data;
 
 namespace DeckAssist.View
 {
+    /// <summary>
+    /// Converter class for XAML data binding, Converts a card to a string representation of its name
+    /// </summary>
     [ValueConversion(typeof(Card), typeof(string))]
     internal class CardNameConverter : IValueConverter
     {
