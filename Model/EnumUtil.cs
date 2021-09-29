@@ -15,77 +15,37 @@ namespace DeckAssist.Model
         {
             try
             {
-                //define the layout properties
-                LayoutProperty singleName = new LayoutProperty { JSONToken = JSONToken.name, PropertyMode = PropertyMode.Single },
-                               doubleName = new LayoutProperty { JSONToken = JSONToken.name, PropertyMode = PropertyMode.Double },
-                               singleType = new LayoutProperty { JSONToken = JSONToken.type_line, PropertyMode = PropertyMode.Single },
-                               doubleType = new LayoutProperty { JSONToken = JSONToken.type_line, PropertyMode = PropertyMode.Double },
-                               singleArt = new LayoutProperty
-                                   { JSONToken = JSONToken.image_uris_normal, PropertyMode = PropertyMode.Single },
-                               doubleArt = new LayoutProperty
-                                   { JSONToken = JSONToken.image_uris_normal, PropertyMode = PropertyMode.Double },
-                               singleColor = new LayoutProperty { JSONToken = JSONToken.colors, PropertyMode = PropertyMode.Single },
-                               doubleColor = new LayoutProperty { JSONToken = JSONToken.colors, PropertyMode = PropertyMode.Double },
-                               singleCMC = new LayoutProperty { JSONToken = JSONToken.cmc, PropertyMode = PropertyMode.Single },
-                               doubleCMC = new LayoutProperty { JSONToken = JSONToken.mana_cost, PropertyMode = PropertyMode.Double };
+                PropertySettings normal,
+                                 splitFace,
+                                 doubleOneCMC,
+                                 doubleAll;
+
+                
+                //define "normal" property
+                normal = new PropertySettings();
+
+                //define properties for cards with one split face
+                splitFace = new PropertySettings();
+                splitFace.Name.PropertyMode = PropertyMode.Double;
+                splitFace.Type.PropertyMode = PropertyMode.Double;
+
+                //define cards with one cast that then transform
+                doubleOneCMC = new PropertySettings(PropertyMode.Double);
+                doubleOneCMC.ConvertedManaCost.PropertyMode = PropertyMode.Single;
+
+                //define double sided card
+                doubleAll = new PropertySettings(PropertyMode.Double);
+                //double sided cmc derived from mana_cost entry
+                doubleAll.ConvertedManaCost.JSONToken = JSONToken.mana_cost;
 
                 return new Dictionary<Layout, PropertySettings>
                 {
-                    {
-                        Layout.normal,
-                        new PropertySettings
-                        {
-                            Name = singleName,
-                            Type = singleType,
-                            ArtFaces = singleArt,
-                            ColorIdentities = singleColor,
-                            ConvertedManaCost = singleCMC
-                        }
-                    },
-                    {
-                        Layout.split,
-                        new PropertySettings
-                        {
-                            Name = singleName,
-                            Type = singleType,
-                            ArtFaces = singleArt,
-                            ColorIdentities = singleColor,
-                            ConvertedManaCost = singleCMC
-                        }
-                    },
-                    {
-                        Layout.flip,
-                        new PropertySettings
-                        {
-                            Name = doubleName,
-                            Type = doubleType,
-                            ArtFaces = singleArt,
-                            ColorIdentities = singleColor,
-                            ConvertedManaCost = singleCMC
-                        }
-                    },
-                    {
-                        Layout.transform,
-                        new PropertySettings
-                        {
-                            Name = doubleName,
-                            Type = doubleType,
-                            ArtFaces = doubleArt,
-                            ColorIdentities = doubleColor,
-                            ConvertedManaCost = singleCMC
-                        }
-                    },
-                    {
-                        Layout.modal_dfc,
-                        new PropertySettings
-                        {
-                            Name = doubleName,
-                            Type = doubleType,
-                            ArtFaces = doubleArt,
-                            ColorIdentities = doubleColor,
-                            ConvertedManaCost = doubleCMC
-                        }
-                    }
+                    { Layout.normal, normal },
+                    { Layout.split, splitFace },
+                    { Layout.flip, splitFace },
+                    { Layout.transform, doubleOneCMC },
+                    { Layout.modal_dfc, doubleAll },
+                    { Layout.meld, normal }
                 };
             }
             catch (ArgumentOutOfRangeException ex)

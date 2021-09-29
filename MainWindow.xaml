@@ -6,7 +6,7 @@
         xmlns:DVC="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=DotNetProjects.DataVisualization.Toolkit"
         xmlns:local="clr-namespace:DeckAssist.View"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1080" Width="1900">
+        Title="MainWindow" Height="1080" Width="1541.6">
     <Window.Resources>
         <local:ManaCurveConverter x:Key="ManaCurveConverter"/>
         <local:CardNameConverter x:Key="CardNameConverter"/>
@@ -71,6 +71,30 @@
         <Button Content="Add Cards to Deck" Command="{Binding AddToDeck}" HorizontalAlignment="Left" Margin="105,232,0,0" VerticalAlignment="Top" Width="121"/>
         <Border BorderBrush="BlueViolet" Visibility="{Binding FrontBorder}" BorderThickness="5" HorizontalAlignment="Left" Height="340" Margin="654,10,0,0" VerticalAlignment="Top" Width="244"/>
         <Border BorderBrush="BlueViolet" Visibility="{Binding BackBorder}" BorderThickness="5" HorizontalAlignment="Left" Height="340" Margin="903,10,0,0" VerticalAlignment="Top" Width="244"/>
+        
+        <ScrollViewer Visibility="Visible" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" CanContentScroll="True" Height="200" Width="366" Margin="1160,51,0,0">
+            <ItemsControl ItemsSource="{Binding SelectedCard.RelatedCards}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image ToolTipService.InitialShowDelay="0" Source="{Binding SelectedCardFaceDetail.ImageURI}" Height="170" Width="122">
+                            <Image.ToolTip>
+                                <ToolTip StaysOpen="True">
+                                    <Image Source="{Binding SelectedCardFaceDetail.ImageURI}" Height="476" Width="342"/>
+                                </ToolTip>
+                            </Image.ToolTip>
+                        </Image>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <Label Content="Related Cards:" HorizontalAlignment="Left" Margin="1160,10,0,0" VerticalAlignment="Top"/>
+
+
 
     </Grid>
 

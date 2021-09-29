@@ -18,7 +18,6 @@ namespace DeckAssist.ViewModel
 {
     internal class MainViewModel : ViewModelComponent
     {
-        private readonly static string scryfallExactURI = "https://api.scryfall.com/cards/named?exact=";
 
         /// <summary>
         /// the mana curve is updated when these properties are changed
@@ -149,7 +148,8 @@ namespace DeckAssist.ViewModel
 
             string qtyStr,
                    name,
-                   listing;
+                   listing,
+                   responseString;
 
             int index;
 
@@ -219,24 +219,33 @@ namespace DeckAssist.ViewModel
                     OnIncreaseQty(match, qty);
                 else
                 {
-                    //query the server for cards matching the name
-                    HttpResponseMessage response = await HttpClientManager.GetRequest(scryfallExactURI + name);
-                    string responseString = await HttpClientManager.GetResponseContent(response);
-                    //rate limit requests per the request of scryfall
-                    System.Threading.Thread.Sleep(100);
-
-                    //if the response failed
-                    if (!response.IsSuccessStatusCode)
+                    try
                     {
-                        //display the response code and offending argument
-                        Status = String.Format("ERROR - {0} {1} Card name passed: \"{2}\"",
-                            (int)response.StatusCode, response.ReasonPhrase, listing);
+                        responseString = await ScryfallBridge.FindExact(name);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        Status = ex.Message;
                         AddError(Status);
                         continue;
                     }
 
                     //initialize new card with scryfall response
                     newCard = new Card(responseString, qty);
+
+                    //if card is meld_result, end iteration without adding
+                    if (newCard.MeldType == MeldComponentType.meld_result)
+                    {
+                        Status = String.Format("ERROR - Cannot add {0} to deck as it is a meld token", newCard.DisplayName);
+                        AddError(Status);
+                        continue;
+                    }
+
+                    //if a card has related cards, initialize them here
+                    foreach (Card card in newCard.RelatedCards)
+                    {
+                        await card.PopulateFromName();
+                    }
 
                     //if the user passed the back name of the card, and it's modal, select the back face of this card
                     if (newCard.BackFace.Name.EqualsIgnoreCase(name) && newCard.CardLayout == Layout.modal_dfc)
@@ -264,7 +273,7 @@ namespace DeckAssist.ViewModel
             if (Deck.Cards.Count >= 1)
                 SelectedCard = deck.Cards.First();
 
-            //clear the user inout field
+            //clear the user input field
             DeckText = String.Empty;
             //update user
             Status = String.Format("Cards added {0}", ErrorMessages.Equals(String.Empty) ? "successfully" : "with errors");
@@ -385,9 +394,17 @@ namespace DeckAssist.ViewModel
         }
         private async Task OnImportDeck()
         {
-            SelectedCard = new Card();
-            Deck.ClearDeck();
-            await OnAddToDeck();
+            try
+            {
+                SelectedCard = new Card();
+                Deck.ClearDeck();
+                await OnAddToDeck();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal("Unhandled exception\n" + ex.StackTrace);
+                throw;
+            }
         }
 
         private void OnIncreaseQty(Card card, int amount = 1)

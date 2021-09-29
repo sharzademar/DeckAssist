@@ -11,6 +11,44 @@ namespace DeckAssist.Model
     /// </summary>
     public class PropertySettings
     {
+        private void InitSettings(PropertyMode mode)
+        {
+            Name = new LayoutProperty
+            {
+                JSONToken = JSONToken.name,
+                PropertyMode = mode
+            };
+            Type = new LayoutProperty
+            {
+                JSONToken = JSONToken.type_line,
+                PropertyMode = mode
+            };
+            ArtFaces = new LayoutProperty
+            {
+                JSONToken = JSONToken.image_uris_normal,
+                PropertyMode = mode
+            };
+            ColorIdentities = new LayoutProperty
+            {
+                JSONToken = JSONToken.colors,
+                PropertyMode = mode
+            };
+            ConvertedManaCost = new LayoutProperty
+            {
+                JSONToken = JSONToken.cmc,
+                PropertyMode = mode
+            };
+        }
+
+        /// <summary>
+        /// Initializes the propety mode of each property as the provided mode
+        /// </summary>
+        /// <param name="mode">The PropertyMode the property should contain</param>
+        public PropertySettings(PropertyMode mode = PropertyMode.Single)
+        {
+            InitSettings(mode);
+        }
+
         public LayoutProperty Name { get; set; }
         public LayoutProperty Type { get; set; }
         public LayoutProperty ArtFaces { get; set; }

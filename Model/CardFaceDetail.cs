@@ -1,4 +1,5 @@
-﻿using DeckAssist.ViewModel;
+﻿using DeckAssist.Http;
+using DeckAssist.ViewModel;
 using System;
 
 namespace DeckAssist.Model
@@ -40,8 +41,6 @@ namespace DeckAssist.Model
     /// </summary>
     public class CardFaceDetail : ViewModelComponent
     {
-        private const string cardBack = "https://c1.scryfall.com/file/scryfall-card-backs/normal/59/597b79b3-7d77-4261-871a-60dd17403388.jpg";
-
         private CardType cardTypes;
         private int cmc;
         private ColorIdentity colorIdentities;
@@ -58,7 +57,7 @@ namespace DeckAssist.Model
             cmc = -1;
             name = "Unassigned";
             typeLine = "Unassigned";
-            imageURI = cardBack; //default to card back
+            imageURI = ScryfallBridge.CardBackURI; //default to card back
             colorIdentities = ColorIdentity.None;
             cardTypes = CardType.None;
         }

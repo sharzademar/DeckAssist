@@ -1,7 +1,10 @@
-﻿using DeckAssist.ViewModel;
+﻿using DeckAssist.Http;
+using DeckAssist.ViewModel;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DeckAssist.Model
 {
@@ -34,6 +37,16 @@ namespace DeckAssist.Model
     }
 
     /// <summary>
+    /// represents the card's role in a meld
+    /// </summary>
+    public enum MeldComponentType
+    {
+        nonmeld,
+        meld_result,
+        meld_part
+    }
+
+    /// <summary>
     /// Represents a card, its faces, and any other data associated with the card
     /// </summary>
     public class Card : ViewModelComponent
@@ -48,8 +61,9 @@ namespace DeckAssist.Model
 
         private static readonly string[] twoManaBlocks = new string[] { "2/W", "2/U", "2/B", "2/R", "2/G" };
 
-        private readonly JObject cardJson;
+        private JObject cardJson;
 
+        private ObservableCollection<Card> relatedCards;
         private CardFaceDetail backFace;
         private Layout cardLayout;
         private int cmc;
@@ -57,12 +71,19 @@ namespace DeckAssist.Model
         private CardFaceDetail frontFace;
         private int qty;
         private CardFaceDetail selectedCardFaceDetail;
+        private MeldComponentType meldType;
+
+        /// <summary>
+        /// The cards related to this card by any particular mechanic; includes tokens
+        /// </summary>
+        public ObservableCollection<Card> RelatedCards { get => relatedCards; set => SetProperty(ref relatedCards, value); }
 
         /// <summary>
         /// Return a new <c>Card</c> with default values
         /// </summary>
         public Card()
         {
+            relatedCards = new ObservableCollection<Card>();
             qty = 0;
             cmc = 0;
             displayName = "Unassigned";
@@ -70,22 +91,35 @@ namespace DeckAssist.Model
             frontFace = new CardFaceDetail();
             backFace = new CardFaceDetail();
             selectedCardFaceDetail = frontFace;
+            meldType = MeldComponentType.nonmeld;
+        }
+
+        //private constructor for initializing name field to delay running async command
+        private Card(string name) : this()
+        {
+            displayName = name;
         }
 
         /// <summary>
-        /// Return a card populated by a scryfall response to <c>cards/named?exact=</c>
+        /// Makes an exact request to scryfall based on displayname of card, and initializes object with response
         /// </summary>
-        /// <param name="response">A response from the scryfall api at cards/named?exact=</param>
-        /// <param name="qty">The number of cards this card entry object represents</param>
-        /// <exception cref="JsonReaderException"></exception>
-        /// <exception cref="KeyNotFoundException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="ArgumentNullException"></exception>
-        public Card(string response, int qty) : this()
+        public async Task PopulateFromName()
+        {
+            string response = await ScryfallBridge.FindExact(DisplayName);
+            ReadJson(response);
+        }
+
+        //read a json reponse
+        private void ReadJson(string response)
         {
             bool isCMCSingle;
-            string strLayout;
+
+            string strLayout,
+                   matchingComponentType;
+
             int frontCMC;
+
+            JToken meldToken;
 
             //read response json
             cardJson = JObject.Parse(response);
@@ -104,6 +138,37 @@ namespace DeckAssist.Model
             Qty = qty;
             CardLayout = layout;
 
+            //if meld
+            if (CardLayout == Layout.meld)
+            {
+                //get all meld compenents
+                meldToken = cardJson.SelectToken("all_parts");
+
+                var related = meldToken
+                    .Select
+                    (
+                        x => new Card
+                             (
+                                (string)x.SelectToken("name")
+                             )
+                    );
+                RelatedCards = new ObservableCollection<Card>(related);
+
+
+                //get meld component that is this card
+                var mmeldToken = meldToken
+                    .Where(x => ((string)x.SelectToken("name")).Equals(DisplayName))
+                    .Select(x => (string)x.SelectToken("component"))
+                    .First();
+
+                if (!EnumUtil.TryParse(mmeldToken, out MeldComponentType meld))
+                {
+                    throw new ArgumentException(String.Format("Scryfall return unexpected meld component type: {0}", meldToken), response);
+                }
+
+                MeldType = meld;
+            }
+
             //get properties of layout
             PropertySettings properties = EnumUtil.GetPropertySettings(CardLayout);
             isCMCSingle = properties.ConvertedManaCost.PropertyMode == PropertyMode.Single;
@@ -113,6 +178,8 @@ namespace DeckAssist.Model
                 FrontFace.Name = (string)x[0];
                 if (y == PropertyMode.Double)
                     BackFace.Name = (string)x[1];
+                else
+                    DisplayName = (string)x[0];
             });
             SetTarget(properties.Type, (x, y) =>
             {
@@ -133,14 +200,29 @@ namespace DeckAssist.Model
                     AddIdentityToFace(BackFace, x[1]);
             });
             SetTarget(properties.ConvertedManaCost, (x, y) =>
-                {
-                    //assign front cmc to upper cmc token if single, or convert from child mana_cost tokens if double
-                    frontCMC = isCMCSingle ? (int)x[0] : ConvertManaCostToCMC((string)x[0]);
-                    FrontFace.ConvertedManaCost = frontCMC;
-                    ConvertedManaCost = FrontFace.ConvertedManaCost;
-                    if (y == PropertyMode.Double)
-                        BackFace.ConvertedManaCost = ConvertManaCostToCMC((string)x[1]);
-                });
+            {
+                //assign front cmc to upper cmc token if single, or convert from child mana_cost tokens if double
+                frontCMC = isCMCSingle ? (int)x[0] : ConvertManaCostToCMC((string)x[0]);
+                FrontFace.ConvertedManaCost = frontCMC;
+                ConvertedManaCost = FrontFace.ConvertedManaCost;
+                if (y == PropertyMode.Double)
+                    BackFace.ConvertedManaCost = ConvertManaCostToCMC((string)x[1]);
+            });
+        }
+
+        /// <summary>
+        /// Return a card populated by a scryfall response to <c>cards/named?exact=</c>
+        /// </summary>
+        /// <param name="response">A response from the scryfall api at cards/named?exact=</param>
+        /// <param name="qty">The number of cards this card entry object represents</param>
+        /// <exception cref="JsonReaderException"></exception>
+        /// <exception cref="KeyNotFoundException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        public Card(string response, int qty) : this()
+        {
+            Qty = qty;
+            ReadJson(response);
         }
 
         /// <summary>
@@ -177,6 +259,11 @@ namespace DeckAssist.Model
         /// A reference to the currently selected face
         /// </summary>
         public CardFaceDetail SelectedCardFaceDetail { get => selectedCardFaceDetail; set => SetProperty(ref selectedCardFaceDetail, value); }
+
+        /// <summary>
+        /// The role this card plays in a meld
+        /// </summary>
+        public MeldComponentType MeldType { get => meldType; set => SetProperty(ref meldType, value); }
 
         /// <summary>
         /// Memberwise clone a Card object
