@@ -45,7 +45,10 @@ namespace DeckAssist.Model
                     { Layout.flip, splitFace },
                     { Layout.transform, doubleOneCMC },
                     { Layout.modal_dfc, doubleAll },
-                    { Layout.meld, normal }
+                    { Layout.meld, normal },
+                    { Layout.token, normal },
+                    { Layout.double_faced_token, doubleOneCMC },
+                    { Layout.emblem, normal }
                 };
             }
             catch (ArgumentOutOfRangeException ex)

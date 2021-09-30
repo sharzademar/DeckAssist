@@ -129,6 +129,7 @@
     </EmbeddedResource>
     <None Include="JSONExamples\flip.json" />
     <None Include="JSONExamples\modal_dfc.json" />
+    <None Include="JSONExamples\multiple_choice.json" />
     <None Include="JSONExamples\normal.json" />
     <None Include="JSONExamples\split.json" />
     <None Include="JSONExamples\transform.json" />

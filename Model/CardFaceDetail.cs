@@ -18,7 +18,9 @@ namespace DeckAssist.Model
         Planeswalker = 1 << 4,
         Instant = 1 << 5,
         Sorcery = 1 << 6,
-        Legendary = 1 << 7
+        Legendary = 1 << 7,
+        Tribal = 1 << 8,
+        Aura = 1 << 9
     }
 
     /// <summary>

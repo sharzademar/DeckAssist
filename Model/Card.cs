@@ -2,6 +2,7 @@
 using DeckAssist.ViewModel;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace DeckAssist.Model
         flip, //implemented
         transform, //implemented
         modal_dfc, //implemented
-        meld,
+        meld, //implemented
         leveler,
         _class,
         saga,
@@ -72,6 +73,7 @@ namespace DeckAssist.Model
         private int qty;
         private CardFaceDetail selectedCardFaceDetail;
         private MeldComponentType meldType;
+        private string id; 
 
         /// <summary>
         /// The cards related to this card by any particular mechanic; includes tokens
@@ -83,6 +85,7 @@ namespace DeckAssist.Model
         /// </summary>
         public Card()
         {
+            id = String.Empty;
             relatedCards = new ObservableCollection<Card>();
             qty = 0;
             cmc = 0;
@@ -94,18 +97,23 @@ namespace DeckAssist.Model
             meldType = MeldComponentType.nonmeld;
         }
 
+        /// <summary>
+        /// The scryfall id of the card
+        /// </summary>
+        public string ID { get => id; set => SetProperty(ref id, value); }
+
         //private constructor for initializing name field to delay running async command
-        private Card(string name) : this()
+        private Card(string id) : this()
         {
-            displayName = name;
+            ID = id;
         }
 
         /// <summary>
         /// Makes an exact request to scryfall based on displayname of card, and initializes object with response
         /// </summary>
-        public async Task PopulateFromName()
+        public async Task PopulateFromID()
         {
-            string response = await ScryfallBridge.FindExact(DisplayName);
+            string response = await ScryfallBridge.FindID(ID);
             ReadJson(response);
         }
 
@@ -115,11 +123,12 @@ namespace DeckAssist.Model
             bool isCMCSingle;
 
             string strLayout,
-                   matchingComponentType;
+                   matchingComponent;
 
             int frontCMC;
 
-            JToken meldToken;
+            IEnumerable<JToken> allParts,
+                                otherParts;
 
             //read response json
             cardJson = JObject.Parse(response);
@@ -134,36 +143,46 @@ namespace DeckAssist.Model
             }
 
             //set high level properties
+            ID = (string)cardJson.SelectToken("id");
             DisplayName = ((string)cardJson.SelectToken("name"));
             Qty = qty;
             CardLayout = layout;
 
-            //if meld
-            if (CardLayout == Layout.meld)
-            {
-                //get all meld compenents
-                meldToken = cardJson.SelectToken("all_parts");
+            //get all related compenents
+            allParts = cardJson.SelectToken("all_parts");
+            
+            
 
-                var related = meldToken
+            //if they exist
+            if (allParts != null)
+            {
+                otherParts = allParts.Where(x => !((string)x.SelectToken("id")).Equals(ID));
+
+                //reference every component that isnt this card
+                var related = otherParts
                     .Select
                     (
                         x => new Card
                              (
-                                (string)x.SelectToken("name")
+                                (string)x.SelectToken("id")
                              )
                     );
+                //set property to this reference
                 RelatedCards = new ObservableCollection<Card>(related);
+            }
 
-
+            //if meld
+            if (CardLayout == Layout.meld)
+            {
                 //get meld component that is this card
-                var mmeldToken = meldToken
-                    .Where(x => ((string)x.SelectToken("name")).Equals(DisplayName))
+                matchingComponent = allParts
+                    .Where(x => ((string)x.SelectToken("id")).Equals(ID))
                     .Select(x => (string)x.SelectToken("component"))
                     .First();
 
-                if (!EnumUtil.TryParse(mmeldToken, out MeldComponentType meld))
+                if (!EnumUtil.TryParse(matchingComponent, out MeldComponentType meld))
                 {
-                    throw new ArgumentException(String.Format("Scryfall return unexpected meld component type: {0}", meldToken), response);
+                    throw new ArgumentException(String.Format("Scryfall return unexpected meld component type: {0}", matchingComponent), response);
                 }
 
                 MeldType = meld;
@@ -373,6 +392,11 @@ namespace DeckAssist.Model
             return cmc;
         }
 
+        /// <summary>
+        /// Accepts a layout property, and an action that is expected to set the properties of this card via the action's return values
+        /// </summary>
+        /// <param name="property"></param>
+        /// <param name="action"></param>
         private void SetTarget(LayoutProperty property, Action<JToken[], PropertyMode> action)
         {
             JToken jFaces;

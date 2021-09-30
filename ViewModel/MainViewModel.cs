@@ -244,7 +244,7 @@ namespace DeckAssist.ViewModel
                     //if a card has related cards, initialize them here
                     foreach (Card card in newCard.RelatedCards)
                     {
-                        await card.PopulateFromName();
+                        await card.PopulateFromID();
                     }
 
                     //if the user passed the back name of the card, and it's modal, select the back face of this card

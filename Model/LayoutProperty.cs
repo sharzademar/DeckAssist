@@ -16,7 +16,7 @@ namespace DeckAssist.Model
         colors,
         type_line,
         cmc,
-        mana_cost
+        mana_cost,
     }
 
     /// <summary>
